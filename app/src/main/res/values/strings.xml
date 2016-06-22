@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">RPIConnect</string>
+    <string name="title_activity_check_status">CheckStatus</string>
+</resources>
