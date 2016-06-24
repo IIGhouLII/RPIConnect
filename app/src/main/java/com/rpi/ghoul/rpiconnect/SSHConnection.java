@@ -25,80 +25,84 @@ import java.util.Properties;
  * Created by ghoul on 6/17/16.
  */
 public class SSHConnection extends Service{
+    private static final String TAG = "SSHConnection";
+    private static final boolean DEBUG = false;
+
     private JSch jsch;
     private Session session;
     private Channel channel;
-    private String TAG = "SSHConnection";
+
     private IBinder mBinder = new MyBinder();
     private TextView ToastText;
-    private Toast toast;
+    private Toast Toast;
     private AsyncTask Task = null;
-
-
 
     @Override
     public void onCreate() {
-        Log.i(TAG, "in onCreate");
+        if (DEBUG) Log.d(TAG,"onCreate()");
         this.jsch=null;
         this.session=null;
         this.channel=null;
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View layout = inflater.inflate(R.layout.toast_layout, null);
         ToastText = (TextView) layout.findViewById(R.id.text);
-        toast = new Toast(getApplicationContext());
-        toast.setDuration(Toast.LENGTH_SHORT);
-        toast.setView(layout);
+        Toast = new Toast(getApplicationContext());
+        Toast.setDuration(Toast.LENGTH_SHORT);
+        Toast.setView(layout);
+    }
+
+    public String getHostname() {
+        return session.getHost();
     }
 
     public IBinder onBind(Intent arg0) {
-        Log.i(TAG, "in onBind");
+        if (DEBUG) Log.d(TAG,"onBind()");
         return mBinder;
     }
 
     @Override
     public void onRebind(Intent intent) {
-        Log.i(TAG, "in onRebind");
+        if (DEBUG) Log.d(TAG,"onRebind()");
         super.onRebind(intent);
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.i(TAG, "in onUnbind");
+        if (DEBUG) Log.d(TAG,"onUnbind()");
         return true;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "in onStartCommand");
+        if (DEBUG) Log.d(TAG,"onStartCommand()");
         // Let it continue running until it is stopped.
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        Log.i(TAG, "in onDestroy");
+        if (DEBUG) Log.d(TAG,"onDestroy()");
         super.onDestroy();
     }
 
 
     public void Connect(String User, String Hostname, String Port){
-        if (Task==null)
-            Task = new SSHConnectTask().execute(User,Hostname,Port);
-        else if (Task.getStatus() == AsyncTask.Status.FINISHED)
+        if ((Task==null) || (Task.getStatus() == AsyncTask.Status.FINISHED))
             Task = new SSHConnectTask().execute(User,Hostname,Port);
     }
 
     public void Disconnect(){
         ConnectionState State=CheckConnection();
         if ((State == ConnectionState.JschNull) || (State == ConnectionState.SessionNull)){
-            ToastText.setText("No connection found"); toast.show();
+            if (DEBUG) Log.d(TAG,"Jsch=null or Session=null");
+            ToastText.setText(R.string.NoConnection); Toast.show();
         }else if (State==ConnectionState.SessionConnected) {
             session.disconnect();
-            Log.i(TAG, "Session Connected="+Boolean.toString(session.isConnected()));
-            ToastText.setText("Disconnected"); toast.show();
+            if (DEBUG) Log.d(TAG, "Session isConnected="+Boolean.toString(session.isConnected()));
+            ToastText.setText(R.string.Disconnected); Toast.show();
         }else{
-            Log.i(TAG, "Session Connected="+Boolean.toString(session.isConnected()));
-            ToastText.setText("Already Disconnected!"); toast.show();
+            if (DEBUG) Log.d(TAG, "Session isConnected="+Boolean.toString(session.isConnected()));
+            ToastText.setText(R.string.AlreadyDisconnected); Toast.show();
         }
     }
 
@@ -114,10 +118,10 @@ public class SSHConnection extends Service{
             return ConnectionState.JschNull;
         }else if (session==null){
             return ConnectionState.SessionNull;
-        }else if (!session.isConnected()){
-            return ConnectionState.SessionDisconnected;
-        }else{
+        }else if (session.isConnected()){
             return ConnectionState.SessionConnected;
+        }else{
+            return ConnectionState.SessionDisconnected;
         }
     }
 
@@ -127,17 +131,16 @@ public class SSHConnection extends Service{
             if (State == ConnectionState.SessionConnected){
                 channel =session.openChannel("exec");
                 ((ChannelExec)channel).setCommand(command);
-                channel.setInputStream(null);
-                InputStream in=channel.getInputStream();
+//                channel.setInputStream(null);
                 channel.connect();
                 channel.disconnect();
                 return 0;
             }else{
-                ToastText.setText("Connection is down"); toast.show();
+                ToastText.setText(R.string.ConnectionDown); Toast.show();
                 return 1;
             }
         }catch (Exception e) {
-            ToastText.setText("Error: " + e.getMessage()); toast.show();
+            ToastText.setText(R.string.Error + e.getMessage()); Toast.show();
             return 2;
         }
     }
@@ -158,11 +161,11 @@ public class SSHConnection extends Service{
                         int i = in.read(tmp, 0, 1024);
                         if (i < 0) break;
                         Output = new String(tmp, 0, i);
-                        Log.i(TAG, Output);
+                        if (DEBUG) Log.d(TAG, "Received Output ="+Output);
                     }
                     if (channel.isClosed()) {
                         if (in.available() > 0) continue;
-                        Log.i(TAG, "exit-status: " + channel.getExitStatus());
+                        if (DEBUG) Log.d(TAG, "exit-status: " + channel.getExitStatus());
                         break;
                     }
                     try { Thread.sleep(SleepTime); } catch (Exception ee) { }
@@ -170,11 +173,12 @@ public class SSHConnection extends Service{
                 channel.disconnect();
                 return Output;
             }else{
-                ToastText.setText("Connection is down"); toast.show();
+                if (DEBUG) Log.d(TAG, "Session is not connected");
+                ToastText.setText(R.string.ConnectionDown); Toast.show();
                 return null;
             }
         }catch (Exception e) {
-            ToastText.setText("Error: " + e.getMessage()); toast.show();
+            ToastText.setText(R.string.Error + e.getMessage()); Toast.show();
             return null;
         }
     }
@@ -191,7 +195,7 @@ public class SSHConnection extends Service{
         private int ConnectionTimeOut=3000;
 
         protected void onPreExecute() {
-            ToastText.setText("Connecting..."); toast.show();
+            ToastText.setText(R.string.Connecting); Toast.show();
         }
 
         protected String doInBackground(String... arg0) {
@@ -217,37 +221,33 @@ public class SSHConnection extends Service{
                     session = jsch.getSession(User, Hostname, Port);
                     session.setConfig(props);
                     session.connect(ConnectionTimeOut);
-                    Log.i(TAG, "Session Connected="+Boolean.toString(session.isConnected()));
-                    return "Connected to Pi";
-                }else if ((State == ConnectionState.SessionNull) || (State == ConnectionState.SessionDisconnected)){
-                    session = jsch.getSession(User, Hostname, Port);
-                    session.connect(ConnectionTimeOut);
-                    Log.i(TAG, "Session Connected="+Boolean.toString(session.isConnected()));
-                    return "Connected to Pi";
+                    if (DEBUG) Log.d(TAG, "Session isConnected="+Boolean.toString(session.isConnected()));
+                    return getString(R.string.Connected);
                 }else if (State == ConnectionState.SessionConnected) {
                     if (!session.getHost().equals(Hostname) || session.getPort()!=Port || !session.getUserName().equals(User)) {
                         session.disconnect();
                         session = jsch.getSession(User, Hostname, Port);
                         session.connect(ConnectionTimeOut);
-                        Log.i(TAG, "Session Connected="+Boolean.toString(session.isConnected()));
-                        return "Connected to Pi";
+                        if (DEBUG) Log.d(TAG, "Session isConnected="+Boolean.toString(session.isConnected()));
+                        return getString(R.string.Connected);
                     }else{
-                        Log.i(TAG, "Session Connected="+Boolean.toString(session.isConnected()));
-                        return "Already Connected";
+                        if (DEBUG) Log.d(TAG, "Session isConnected="+Boolean.toString(session.isConnected()));
+                        return getString(R.string.AlreadyConnected);
                     }
                 }else{
-                    Log.i(TAG, "Session Connected="+Boolean.toString(session.isConnected()));
-                    return "Error: This case is not studied";
+                    session = jsch.getSession(User, Hostname, Port);
+                    session.connect(ConnectionTimeOut);
+                    if (DEBUG) Log.d(TAG, "Session isConnected="+Boolean.toString(session.isConnected()));
+                    return getString(R.string.Connected);
                 }
             } catch (Exception e) {
-                return "Error: " + e.getMessage();
+                return getString(R.string.Error) + e.getMessage();
             }
         }
-        protected void onCancelled(String result){
-            ToastText.setText("Connection task canceled!");toast.show();
-        }
+
         protected void onPostExecute(String result) {
-            ToastText.setText(result);toast.show();
+            ToastText.setText(result);
+            Toast.show();
         }
     }
 }

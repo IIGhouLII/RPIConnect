@@ -1,4 +1,39 @@
 <resources>
     <string name="app_name">RPIConnect</string>
+
+    <string name="NoConnection">No connection found</string>
+    <string name="Connecting">Connecting...</string>
+    <string name="Disconnected">Disconnected</string>
+    <string name="Connected">Connected to Pi</string>
+
+    <string name="AlreadyDisconnected">Already Disconnected!</string>
+    <string name="AlreadyConnected">"Already Connected!"</string>
+    <string name="PleaseConnect">Please Connect!</string>
+    <string name="ConnectionDown">Connection is lost</string>
+
+
+
+    <string name="Command_status">RPIConnect -status</string>
+
+    <string name="Command_mocp_on">RPIConnect -mocp on</string>
+    <string name="Command_mocp_next">RPIConnect -mocp next</string>
+    <string name="Command_mocp_prev">RPIConnect -mocp prev</string>
+    <string name="Command_mocp_play_pause">RPIConnect -mocp play_pause</string>
+    <string name="Command_mocp_off">RPIConnect -mocp off</string>
+
+    <string name="Command_buzz_on">RPIConnect -buzz on</string>
+    <string name="Command_buzz_off">RPIConnect -buzz off</string>
+
+    <string name="Command_stream_on">RPIConnect -stream on</string>
+    <string name="Command_stream_off">RPIConnect -stream off</string>
+
+    <string name="Command_pulseaudio_on">RPIConnect -pulseaudio on</string>
+    <string name="Command_pulseaudio_off">RPIConnect -pulseaudio off</string>
+
+    <string name="Command_vol_up">RPIConnect -vol +</string>
+    <string name="Command_vol_down">RPIConnect -vol -</string>
+
+    <string name="Error">Error: </string>
+
     <string name="title_activity_check_status">CheckStatus</string>
 </resources>

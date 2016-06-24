@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.rpi.ghoul.rpiconnect.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,20 +20,30 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.rpi.ghoul.rpiconnect.MusicController"
-            android:parentActivityName="com.rpi.ghoul.rpiconnect.MainActivity">
+            android:name=".CheckStatus"
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.rpi.ghoul.rpiconnect.MainActivity" />
         </activity>
         <activity
-            android:name="com.rpi.ghoul.rpiconnect.CheckStatus"
-            android:parentActivityName="com.rpi.ghoul.rpiconnect.MainActivity">
+            android:name=".MusicController"
+            android:parentActivityName=".CheckStatus">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.rpi.ghoul.rpiconnect.MainActivity" />
+                android:value="com.rpi.ghoul.rpiconnect.CheckStatus" />
         </activity>
-        <service android:name= "com.rpi.ghoul.rpiconnect.SSHConnection" />
+
+        <activity
+            android:name=".LiveStreaming"
+            android:parentActivityName=".CheckStatus">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.rpi.ghoul.rpiconnect.CheckStatus" />
+        </activity>
+
+        <service android:name=".SSHConnection" />
+
 
     </application>
 
